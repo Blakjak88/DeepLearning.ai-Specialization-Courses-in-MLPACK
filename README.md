@@ -1,2 +1,7 @@
 # DeepLearning.ai-Specialization-Courses-in-MLPACK
-Rewriting the Coursera DeepLearning.ai Specializations in C++ using MLPACK
+
+Rewriting the Coursera DeepLearning.ai Specializations Exercises in C++ using MLPACK. 
+
+The original examples from the course are written using Python and Tensorflow.
+
+The purpose of this is to better learn and understand the course methodolgy and also to clearly understand the proper use of MLPACK.
