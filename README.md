@@ -1,4 +1,4 @@
-# DeepLearning.ai-Specialization-Courses-in-MLPACK
+# DeepLearning.ai Specialization Course Exercises in C++ with MLPACK
 
 Rewriting the Coursera DeepLearning.ai Specializations Exercises in C++ using MLPACK. 
 
