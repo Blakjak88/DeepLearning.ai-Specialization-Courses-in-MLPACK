@@ -153,7 +153,7 @@ void main()
 		yPredictLabels = arma::index_max(yPredict, 0) + 1;
 		double testAccuracy = arma::accu(yPredictLabels == arma::round(testSetY))*100.0 / (double)testSetX.n_cols;
 
-		if (!epoch%5)
+		if (!(epoch%5))
 		   std::cout << "Epoch: " << epoch << "\t" << "Training Accuracy   = " << trainAccuracy << "%"	<< "\tTest Accuracy = " << testAccuracy << "%\n";
 	}
 
