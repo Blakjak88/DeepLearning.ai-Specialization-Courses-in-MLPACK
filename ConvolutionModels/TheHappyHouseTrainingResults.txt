@@ -1,0 +1,10 @@
+Epoch: 0	Training Accuracy   = 83.1667%	Test Accuracy = 80%
+Epoch: 5	Training Accuracy   = 87.8333%	Test Accuracy = 78%
+Epoch: 10	Training Accuracy   = 78.6667%	Test Accuracy = 68%
+Epoch: 15	Training Accuracy   = 87.1667%	Test Accuracy = 78%
+Epoch: 20	Training Accuracy   = 90.8333%	Test Accuracy = 80%
+Epoch: 25	Training Accuracy   = 94.3333%	Test Accuracy = 84%
+Epoch: 30	Training Accuracy   = 96.6667%	Test Accuracy = 86.6667%
+Epoch: 35	Training Accuracy   = 96.6667%	Test Accuracy = 87.3333%
+Epoch: 40	Training Accuracy   = 97%	Test Accuracy = 90%
+Epoch: 45	Training Accuracy   = 97.1667%	Test Accuracy = 91.3333%
