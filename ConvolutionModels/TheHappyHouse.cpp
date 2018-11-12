@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
 
 	// Normalize
 	trainSetX /= 255;
+	testSetX /= 255;
 
 	// The model architecture as per the course example is:
 	// (1)Conv2D->(2)BatchNorm->(3)ReLU->(4)MaxPool->(5)(X)(Flatten->)(5)FullyConnected->(6)Sigmoid
