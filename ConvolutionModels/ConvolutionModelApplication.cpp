@@ -16,25 +16,39 @@ using namespace mlpack;
 using namespace mlpack::ann;
 using namespace mlpack::optimization;
 
-void main()
+int main(int argc, char* argv[])
 {
 	////////////////////////////////////////////////////////////////////////
 	//
 	// Convolution Model - Application
 	//
 	// # Imports 1,080 training images and 120 testing images of dimension
-	// # 64x64x3 from .H5 databases and runs a Conv net replicating the 
+	// # 64x64x3 from .H5 databases and runs a Conv net replicating the
 	// # DeepLearning.ai exercise model.
 	//
 	// # Requires HDF5 and H5CPP libraries.
-	//  
-	// # Note:  The Python model in the exercise results in a training
-	// #        accuracy of 94.1% and a test accuracy of 78.3%. Nothing
-	// #        like this has yet been achieved by me using MLPACK.
 	//
-	// # Author:  David Armour
+	// # Note:  The Python model in the exercise results in a training
+	// #        accuracy of 94.1% and a test accuracy of 78.3%. By slightly
+	// #        changing the model (filter dims) and using the following
+	// #        parameters the result with MLPACK is a training accuracy of
+	// #        93% and a test accuracy of 80%.
+	// #
+	// #        LearningRate = 0.009
+	// #        BatchSize = 64
+	// #        MaxIterations = 1080  (i.e. size of training dataset)
+	// #        Epochs = 100
+	//
+	// # Author:  David Armour (11 Nov 2018)
 	//
 	////////////////////////////////////////////////////////////////////////
+
+	if (argc != 5)
+	{
+      std::cout << "\nWrong number of parameters. Correct usage is:\n\n\tConvolutionModelApplication W X Y Z\n\n\twhere,\tW = learning rate\n\t\tX = batchSize\n\t\tY = maxIterations\n\t\tZ = nbr of epochs.\n" << std::endl;
+      return -1;
+	}
+
 	arma::mat trainSetX(64 * 64 * 3, 1080);
 	arma::mat trainSetY(1, 1080);
 	arma::mat testSetX(64 * 64 * 3, 120);
@@ -83,19 +97,22 @@ void main()
 	testSetX /= 255;
 
 	// The model architecture as per the course example is:
-	// (1)Conv2D->(2)ReLU->(3)MaxPool->(4)Conv2D->(5)ReLU->(6)MaxPool->(7)(Flatten->)(8)FullyConnected->(9)LogSoftMax
+	// (1)Conv2D->(2)ReLU->(3)MaxPool->(4)Conv2D->(5)ReLU->(6)MaxPool->(X)(Flatten->)(7)FullyConnected->(8)LogSoftMax
 	//
 	//     Input Dim    Description
 	//     ---------    -----------
-	// (1)  64x64x3   -- Apply 8 filters of size 4x4 with stride = 2 and "Same" padding (= 2 is closest equivalent)
-	// (2)  65x65x8   -- Standard ReLU layer
+	// (1)  64x64x3   -- Apply 8 filters of size^ 5x5 with stride = 2 and "Same" padding (= 2)
+	// (2)  65x65x8   -- Leaky ReLU layer (better than ReLU)
 	// (3)  65x65x8   -- Pooling layer of size 8x8 with stride = 8
-	// (4)  8x8x8     -- Apply 16 filters of size 2x2 with stride = 1 and "Same" padding (= 1 is closest equivalent)
-	// (5)  9x9x16    -- Standard ReLU layer
+	// (4)  8x8x8     -- Apply 16 filters of size^ 3x3 with stride = 1 and "Same" padding (= 1)
+	// (5)  9x9x16    -- Leaky ReLU layer (better than ReLU)
 	// (6)  9x9x16    -- Pooling layer of size 4x4 with stride = 4
-	// (7)  2x2x16    -- Flatten (this is taken care of by the Linear layer input in MLPACK)
-	// (8)  64x6      -- Fully connected layer -> output = 6.
-	// (9)  6x6       -- LogSoftMax layer
+	// (X)  2x2x16    -- Flatten (this is taken care of by the Linear layer input in MLPACK)
+	// (7)  64x6      -- Fully connected layer -> output = 6.
+	// (8)  6x6       -- LogSoftMax layer
+	//
+	// Note:   ^  The Coursera course example uses 4x4 and 2x2 filters but I found that using 5x5 and 3x3
+	//            converges much better. Also the course uses ReLU layers but LeakyReLU works better.
 
 	FFN <NegativeLogLikelihood<>, XavierInitialization> model;
 	model.Add<Convolution<> >(
@@ -107,9 +124,9 @@ void main()
 		1,		// Stride for Height
 		2,		// Padding for Width
 		2,		// Padding for Heigth
-		64,	// Input Height
+		64,   // Input Height
 		64);	// Output Height
-	model.Add<ReLULayer<> >();
+	model.Add<LeakyReLU<> >();
 	model.Add<MaxPooling<> >(
 		8,		// Width of Pooling filter
 		8,		// Height of Pooling filter
@@ -117,26 +134,26 @@ void main()
 		8,		// Stride for Height
 		true);// True = floor / False = ceil (used for output dimension formula to round up or down if non-integer result)
 	model.Add<Convolution<> >(8, 16, 3, 3, 1, 1, 1, 1, 8, 8);
-	model.Add<ReLULayer<> >();
+	model.Add<LeakyReLU<> >();
 	model.Add<MaxPooling<> >(4, 4, 4, 4, true);
 	model.Add<Linear<> >(64, 6);
 	model.Add<LogSoftMax<> >();
 
 	// Define the optimizer. Here we are using the Stochastic Gradient Descent with the Adam update function.
 	// Arguments:
-	// - learning rate = 0.009
-	// - batchsize     = 64
-	// - maxIterations = 10000
+	// - learning rate = 1st input (e.g. 0.009)
+	// - batchsize     = 2nd input (e.g. 64)
+	// - maxIterations = 3rd input (e.g. 1080)    (Note: Nbr of iterations is incremented by batchSize at each loop thru' a batch so this
+	//                                                   needs to be set to the number of examples if you want one pass thru' the dataset.
 	AdamUpdate adamUpdate(1e-8, 0.9, 0.999);
-	SGD<AdamUpdate> optimizer(0.009, 64, 10000, 1e-05, true, adamUpdate);
+	SGD<AdamUpdate> optimizer(std::stod(argv[1]), std::stoi(argv[2]), std::stoi(argv[3]), 1e-05, true, adamUpdate);
 
 	trainSetY += 1;  // NegativeLogLikelihood expects output in range [1, N]. Data was in range [0,N-1] previously.
-	testSetY += 1;   // NegativeLogLikelihood expects output in range [1, N]. Data was in range [0,N-1] previously.
 
-	for (unsigned int epoch = 0; epoch < 200; ++epoch)
+	for (int epoch = 0; epoch < std::stoi(argv[4]); ++epoch)
 	{
 		model.Train(trainSetX, trainSetY, optimizer);
-		optimizer.ResetPolicy() = false;   // Keep the trained parameter settings from the previous epoch.
+		optimizer.ResetPolicy() = false;   // Keep the initial and trained parameter settings from the previous epoch.
 
 		// Matrix to store the predictions on train and validation datasets.
 		arma::mat     yPredict;
@@ -150,16 +167,14 @@ void main()
 		// Get predictions and accuracy on test data points.
 		yPredict.clear();
 		model.Predict(testSetX, yPredict);
-		yPredictLabels = arma::index_max(yPredict, 0) + 1;
-		double testAccuracy = arma::accu(yPredictLabels == arma::round(testSetY))*100.0 / (double)testSetX.n_cols;
+		yPredictLabels = arma::index_max(yPredict, 0);
+		double testAccuracy = arma::accu(yPredictLabels == testSetY)*100.0 / (double)testSetX.n_cols;
 
-		if (!(epoch%5))
-		   std::cout << "Epoch: " << epoch << "\t" << "Training Accuracy   = " << trainAccuracy << "%"	<< "\tTest Accuracy = " << testAccuracy << "%\n";
+		if (!((epoch+1)%5))
+		   std::cout << "Epoch: " << epoch+1 << "\t" << "Training Accuracy   = " << trainAccuracy << "%"	<< "\tTest Accuracy = " << testAccuracy << "%" << std::endl;
 	}
 
 	data::Save("data/CNNSignsRGBModel.bin", "model", model, false);   // Save the trained model.
 
-	getchar();
+	return 0;
 }
-
-
