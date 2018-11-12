@@ -31,7 +31,9 @@ int main(int argc, char* argv[])
 	// # which currently requires downloading the source and compiling.
 	//
 	// # Note:   The Python model in the exercise results in a training
-	// #         accuracy of 94.1% and a test accuracy of 78.3%.
+	// #         accuracy of 94.1% and a test accuracy of 78.3%. This
+	// #         MLPACK model should obtain 97.8% train accuracy and 92%
+	// #         test accuracy.
 	//
 	// # Inputs: Four inputs required on the commnadline. W, X, Y, Z, where
 	// #         W = learningRate, X = batchSize, Y = maxiterations,
@@ -41,7 +43,7 @@ int main(int argc, char* argv[])
 	// #        LearningRate = 0.001
 	// #        BatchSize = 16
 	// #        MaxIterations = 600  (i.e. size of training dataset)
-	// #        Epochs = 50
+	// #        Epochs = 40
 	//
 	//
 	// # Author:  David Armour
@@ -111,9 +113,9 @@ int main(int argc, char* argv[])
 	//     ---------     ----------     -----------
 	// (1)  64x64x3      64x64x32       -- Apply 16 filters of size 3x3 with stride = 1 and "Same" padding (= 1)
 	// (2)  64x64x32     64x64x32       -- Apply a Batch normalisation layer after the Convolution.
-	// (3)  64x64x32     64x64x32       -- Leaky ReLU layer (performs better than standard ReLU)
+	// (3)  64x64x32     64x64x32       -- LeakyReLU layer
 	// (4)  64x64x32     32x32x32       -- Pooling layer of size 2x2 with stride = 2
-	// (X)  32x32x32     32768x1         -- Flatten (this is taken care of by the Linear layer input in MLPACK)
+	// (X)  32x32x32     32768x1        -- Flatten (this is taken care of by the Linear layer input in MLPACK)
 	// (5)  32768x1      1x1            -- Fully connected layer -> output = 1.
 	// (6)  1x1          1x1            -- Sigmoid layer
 
