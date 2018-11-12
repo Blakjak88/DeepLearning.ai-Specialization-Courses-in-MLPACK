@@ -34,16 +34,24 @@ int main(int argc, char* argv[])
 	// # Note:   The Python model in the exercise results in a training
 	// #         accuracy of 94.1% and a test accuracy of 78.3%.
 	//
-	// # Inputs: Three inputs required on the commnadline. X, Y, Z, where
-	// #         X = batchSize, Y = maxiterations, Z = nbr of epochs.
+	// # Inputs: Four inputs required on the commnadline. W, X, Y, Z, where
+	// #         W = learningRate, X = batchSize, Y = maxiterations,
+	// #         Z = nbr of epochs.
+   // #
+   // # Suggested inputs:
+	// #        LearningRate = 0.01
+	// #        BatchSize = 16
+	// #        MaxIterations = 600  (i.e. size of training dataset)
+	// #        Epochs = 50
+	//
 	//
 	// # Author:  David Armour
 	//
 	////////////////////////////////////////////////////////////////////////
 
-	if (argc != 4)
+	if (argc != 5)
 	{
-      std::cout << "\nWrong number of parameters. Correct usage is:\n\n\tTheHappyHouse X Y Z\n\n\twhere,\tX = batchSize\n\t\tY = maxIterations\n\t\tZ = nbr of epochs.\n" << std::endl;
+      std::cout << "\nWrong number of parameters. Correct usage is:\n\n\tTheHappyHouse W X Y Z\n\n\twhere,\tW = learning rate\n\t\tX = batchSize\n\t\tY = maxIterations\n\t\tZ = nbr of epochs.\n" << std::endl;
       return -1;
 	}
 
@@ -95,7 +103,6 @@ int main(int argc, char* argv[])
 
 	// Normalize
 	trainSetX /= 255;
-	testSetX /= 255;
 
 	// The model architecture as per the course example is:
 	// (1)Conv2D->(2)BatchNorm->(3)ReLU->(4)MaxPool->(5)(X)(Flatten->)(5)FullyConnected->(6)Sigmoid
@@ -104,7 +111,7 @@ int main(int argc, char* argv[])
 	//     ---------     ----------     -----------
 	// (1)  64x64x3      64x64x32       -- Apply 16 filters of size 3x3 with stride = 1 and "Same" padding (= 1)
 	// (2)  64x64x32     64x64x32       -- Apply a Batch normalisation layer after the Convolution.
-	// (3)  64x64x32     64x64x32       -- Standard ReLU layer
+	// (3)  64x64x32     64x64x32       -- Leaky ReLU layer (performs better than standard ReLU)
 	// (4)  64x64x32     32x32x32       -- Pooling layer of size 2x2 with stride = 2
 	// (X)  32x32x32     32768x1         -- Flatten (this is taken care of by the Linear layer input in MLPACK)
 	// (5)  32768x1      1x1            -- Fully connected layer -> output = 1.
@@ -123,7 +130,7 @@ int main(int argc, char* argv[])
 		64,   // Input Height
 		64);	// Output Height
 	model.Add<BatchNorm<> >(131072);   // 64x64x32 inputs to normalise
-	model.Add<ReLULayer<> >();
+	model.Add<LeakyReLU<> >();
 	model.Add<MaxPooling<> >(
 		2,		// Width of Pooling filter
 		2,		// Height of Pooling filter
@@ -140,9 +147,9 @@ int main(int argc, char* argv[])
 	// - maxIterations = 2nd input    (Note: maxIterations is incremented by batchSize at each loop thru' a batch so this
 	//                                       needs to be set to the number of examples if you want one pass thru' the dataset.
 	AdamUpdate adamUpdate(1e-8, 0.9, 0.999);
-	SGD<AdamUpdate> optimizer(0.001, std::stoi(argv[1]), std::stoi(argv[2]), 1e-05, true, adamUpdate);
+	SGD<AdamUpdate> optimizer(std::stod(argv[1]), std::stoi(argv[2]), std::stoi(argv[3]), 1e-05, true, adamUpdate);
 
-	for (int epoch = 0; epoch < std::stoi(argv[3]); ++epoch)
+	for (int epoch = 0; epoch < std::stoi(argv[4]); ++epoch)
 	{
 		model.Train(trainSetX, trainSetY, optimizer);
 		optimizer.ResetPolicy() = false;   // Keep the initial and trained parameter settings from the previous epoch.
@@ -160,13 +167,11 @@ int main(int argc, char* argv[])
 		yPredict = arma::conv_to<arma::mat>::from(yPredict > 0.5);
 		double testAccuracy = arma::accu(yPredict == testSetY)*100.0 / (double)testSetX.n_cols;
 
-		if (!(epoch%5))
-		   std::cout << "Epoch: " << epoch << "\t" << "Training Accuracy   = " << trainAccuracy << "%"	<< "\tTest Accuracy = " << testAccuracy << "%" << std::endl;
+		if (!((epoch+1)%5))
+		   std::cout << "Epoch: " << epoch+1 << "\t" << "Training Accuracy   = " << trainAccuracy << "%\tTest Accuracy = " << testAccuracy << "%" << std::endl;
 	}
 
 	data::Save("data/CNNHappyHouseModel.bin", "model", model, false);   // Save the trained model.
 
 	return 0;
 }
-
-
