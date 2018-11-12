@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
 	// #         Z = nbr of epochs.
    // #
    // # Suggested inputs:
-	// #        LearningRate = 0.01
+	// #        LearningRate = 0.001
 	// #        BatchSize = 16
 	// #        MaxIterations = 600  (i.e. size of training dataset)
 	// #        Epochs = 50
