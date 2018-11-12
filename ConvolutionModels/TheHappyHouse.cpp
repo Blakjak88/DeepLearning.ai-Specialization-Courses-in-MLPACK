@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
 	// # Inputs: Four inputs required on the commnadline. W, X, Y, Z, where
 	// #         W = learningRate, X = batchSize, Y = maxiterations,
 	// #         Z = nbr of epochs.
-   // #
-   // # Suggested inputs:
+    // #
+    // # Suggested inputs:
 	// #        LearningRate = 0.001
 	// #        BatchSize = 16
 	// #        MaxIterations = 600  (i.e. size of training dataset)
