@@ -6,7 +6,6 @@
 #include <mlpack/methods/ann/init_rules/glorot_init.hpp>   // For Xavier Iniialisation
 #include <mlpack/core/optimizers/sgd/sgd.hpp>
 #include <mlpack/core/optimizers/adam/adam.hpp>
-//#include <mlpack/core/optimizers/adam/nadam_update.hpp>
 
 #include <h5cpp/all>
 
