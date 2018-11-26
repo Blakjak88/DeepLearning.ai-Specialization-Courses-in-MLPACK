@@ -32,12 +32,16 @@ int main(int argc, char* argv[])
 	// #        accuracy of 94.1% and a test accuracy of 78.3%. By slightly
 	// #        changing the model (filter dims) and using the following
 	// #        parameters the result with MLPACK is a training accuracy of
-	// #        93% and a test accuracy of 80%.
+	// #        97.3% and a test accuracy of 81.7%.
 	// #
 	// #        LearningRate = 0.009
 	// #        BatchSize = 64
 	// #        MaxIterations = 1080  (i.e. size of training dataset)
-	// #        Epochs = 100
+	// #        Epochs = 50
+	// #
+	// #        This model has high variance (overfitting) so introducing 
+	// #        regularisaton (i.e. DropoutLayer) would help improve the
+	// #        test result.
 	//
 	// # Author:  David Armour (11 Nov 2018)
 	//
